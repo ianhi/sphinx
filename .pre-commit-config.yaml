@@ -1,0 +1,79 @@
+# Pre-commit configuration that mirrors GitHub Actions workflows
+# See https://pre-commit.com for more information
+repos:
+  # Ruff - Python linting and formatting (mirrors lint.yml ruff job)
+  # Using exact same version and args as GitHub Actions
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.7
+    hooks:
+      - id: ruff
+        name: Lint with Ruff
+        args: [--output-format=github]
+      - id: ruff-format
+        name: Format with Ruff
+        args: [--diff]
+
+  # MyPy - Type checking (mirrors lint.yml mypy job exactly)
+  # Uses same configuration from pyproject.toml [tool.mypy]
+  - repo: local
+    hooks:
+      - id: mypy
+        name: Type check with mypy
+        entry: uv run mypy
+        language: system
+        types: [python]
+        pass_filenames: false  # Let mypy use its config from pyproject.toml
+        require_serial: true
+
+  # Pyright - Additional type checking (mirrors lint.yml pyright job exactly)  
+  # Uses same configuration from pyproject.toml [tool.pyright]
+  - repo: local
+    hooks:
+      - id: pyright
+        name: Type check with pyright
+        entry: uv run pyright
+        language: system
+        types: [python]
+        pass_filenames: false  # Let pyright use its config from pyproject.toml
+        require_serial: true
+
+  # Sphinx-lint - Documentation linting (mirrors lint.yml docs-lint job)
+  - repo: local
+    hooks:
+      - id: sphinx-lint
+        name: Lint documentation with sphinx-lint
+        entry: make doclinter
+        language: system
+        files: ^(AUTHORS\.rst|CHANGES\.rst|CODE_OF_CONDUCT\.rst|CONTRIBUTING\.rst|README\.rst|doc/.*)$
+        pass_filenames: false
+
+  # Prettier - JavaScript formatting (mirrors lint.yml prettier job)
+  # Using exact same command: npx prettier@3.5 --check
+  - repo: local
+    hooks:
+      - id: prettier
+        name: Format JavaScript with Prettier
+        entry: npx prettier@3.5
+        args: [--check]
+        language: system
+        files: ^(sphinx/themes/.*\.js|tests/js/.*\.(js|mjs))$
+        exclude: ^(sphinx/themes/bizstyle/static/css3-mediaqueries.*\.js|tests/js/fixtures/.*)$
+
+  # Package validation (mirrors lint.yml twine job)
+  - repo: local
+    hooks:
+      - id: twine-check
+        name: Validate package with twine
+        entry: bash -c 'uv run python -m build . && uv run twine check dist/*'
+        language: system
+        files: ^(pyproject\.toml|sphinx/.*)$
+        pass_filenames: false
+        stages: [manual]  # Only run manually with --hook-stage manual
+
+# Configuration
+default_language_version:
+  python: python3
+
+# Only run on staged files by default  
+default_stages: [pre-commit]
+

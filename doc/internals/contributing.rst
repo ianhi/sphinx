@@ -170,6 +170,51 @@ Style and type checks can be run as follows:
     ruff check .
     mypy
 
+Pre-commit hooks
+~~~~~~~~~~~~~~~~
+
+Sphinx includes a `pre-commit <https://pre-commit.com/>`_ configuration that
+automatically runs the same linting and type checking as our GitHub Actions
+workflows before a commit.
+
+To set up pre-commit hooks:
+
+.. code-block:: shell
+
+    # Install pre-commit hooks
+    uvx pre-commit install
+
+    # If you have pre-commit available in your path you can
+    # optionally run on all files to test setup
+    pre-commit run --all-files
+
+**Note:** The pre-commit hooks use ``uv``, as this matches
+our CI environment exactly. The hooks will not all run if ``uv`` is not available.
+
+The pre-commit hooks will now run automatically when you commit changes,
+ensuring your code meets our style and quality standards before submission.
+
+Available hooks include:
+
+* ``ruff`` - Python linting and formatting
+* ``mypy`` - Type checking
+* ``pyright`` - Additional type checking
+* ``sphinx-lint`` - Documentation linting
+* ``prettier`` - JavaScript formatting
+
+You can run specific hooks manually:
+
+.. code-block:: shell
+
+    # Run all hooks
+    pre-commit run --all-files
+
+    # Run only linting
+    pre-commit run ruff --all-files
+
+    # Run package validation (manual stage)
+    pre-commit run --hook-stage manual twine-check
+
 
 Unit tests
 ~~~~~~~~~~
